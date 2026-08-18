@@ -114,11 +114,14 @@
   .empty{padding:26px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:13px}
 
   .schema{display:flex;flex-direction:column;gap:10px}
-  .tbl-def{background:var(--ink);border:1px solid var(--line);border-radius:8px;padding:11px 13px}
-  .tbl-def .name{font-family:var(--mono);color:var(--mint);font-size:13.5px;font-weight:700;margin-bottom:5px}
-  .tbl-def .cols{font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.8}
-  .tbl-def .cols .pk{color:var(--amber)}
-  .tbl-def .cols .fk{color:#c98af0}
+  .tbl-def{background:var(--ink);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .tbl-def .name{font-family:var(--mono);color:var(--mint);font-size:13.5px;font-weight:700;padding:9px 13px;border-bottom:1px solid var(--line);background:var(--panel2)}
+  .tbl-def table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12.5px}
+  .tbl-def td{padding:7px 13px;border-bottom:1px solid rgba(37,67,73,.5);color:var(--muted)}
+  .tbl-def tr:last-child td{border-bottom:none}
+  .tbl-def td.col-key{width:1%;white-space:nowrap;text-align:right;letter-spacing:.5px}
+  .tbl-def td.pk{color:var(--amber)}
+  .tbl-def td.fk{color:#c98af0}
 
   .dots{display:flex;gap:7px;flex-wrap:wrap}
   .dot{width:11px;height:11px;border-radius:50%;border:1px solid var(--line);background:var(--panel2);transition:all .2s;cursor:pointer}
@@ -328,7 +331,7 @@ const LEVELS = [
     pts:10,
     title:'Alle Bücher anzeigen',
     desc:'Wir wollen alles in der Bibliothek sehen. Gib <b>alle</b> Zeilen und Spalten aus der Tabelle <code>buecher</code> aus.',
-    hint:'Der Stern (*) wählt alle Spalten: <code>SELECT * FROM buecher;</code>',
+    hint:'Mit dem Stern (<code>*</code>) wählst du alle Spalten einer Tabelle aus.',
     solution:'SELECT * FROM buecher;',
     check:(cols,rows)=> rows.length===12 && cols.length>=7,
   },
@@ -336,7 +339,7 @@ const LEVELS = [
     pts:10,
     title:'Nur Titel und Jahr',
     desc:'Wir brauchen nicht alle Spalten. Gib aus der Tabelle <code>buecher</code> nur die Spalten <code>titel</code> und <code>jahr</code> aus.',
-    hint:'Trenne die Spaltennamen mit Komma: <code>SELECT titel, jahr FROM buecher;</code>',
+    hint:'Willst du mehrere Spalten auswählen, trennst du ihre Namen einfach mit einem Komma.',
     solution:'SELECT titel, jahr FROM buecher;',
     check:(cols,rows)=> rows.length===12 && cols.length===2 &&
         cols.map(c=>c.toLowerCase()).sort().join()==='jahr,titel',
@@ -345,7 +348,7 @@ const LEVELS = [
     pts:15,
     title:'Nur Romane',
     desc:'Filtere die Bücher mit dem Genre <code>Roman</code>. Alle Spalten dürfen kommen, aber nur die Romane.',
-    hint:'Mit <code>WHERE</code> filterst du: <code>WHERE genre = \'Roman\'</code> (Text in einfachen Anführungszeichen).',
+    hint:'Mit <code>WHERE</code> kannst du nach dem Wert einer Spalte filtern. Textwerte gehören in einfache Anführungszeichen.',
     solution:"SELECT * FROM buecher WHERE genre = 'Roman';",
     check:(cols,rows)=> rows.length===8,
   },
@@ -353,7 +356,7 @@ const LEVELS = [
     pts:15,
     title:'Nach 1950 erschienen',
     desc:'Gib <code>titel</code> und <code>jahr</code> aller Bücher aus, deren <code>jahr</code> größer als 1950 ist.',
-    hint:'Bei Zahlen keine Anführungszeichen: <code>WHERE jahr &gt; 1950</code>',
+    hint:'Auch bei Zahlenvergleichen (<code>&gt;</code>, <code>&lt;</code>, <code>=</code>) nutzt du <code>WHERE</code> — aber ohne Anführungszeichen um die Zahl.',
     solution:'SELECT titel, jahr FROM buecher WHERE jahr > 1950;',
     check:(cols,rows)=> rows.length===3 && cols.length===2,
   },
@@ -361,7 +364,7 @@ const LEVELS = [
     pts:20,
     title:'Die dicksten Bücher zuerst',
     desc:'Sortiere alle Bücher nach <code>seiten</code> — von <b>groß nach klein</b>. Das dickste Buch steht oben.',
-    hint:'<code>ORDER BY seiten DESC</code> — DESC = absteigend.',
+    hint:'Mit <code>ORDER BY</code> sortierst du das Ergebnis nach einer Spalte. <code>DESC</code> steht für absteigend (groß → klein).',
     solution:'SELECT * FROM buecher ORDER BY seiten DESC;',
     check:(cols,rows)=>{
       if(rows.length!==12) return false;
@@ -374,7 +377,7 @@ const LEVELS = [
     pts:20,
     title:'Nicht auf Lager',
     desc:'Gibt es vergriffene Bücher? Finde den Titel der Bücher, deren <code>bestand</code> gleich <b>0</b> ist.',
-    hint:'<code>WHERE bestand = 0</code>. Antwort: nur „Tod auf dem Nil".',
+    hint:'Filtere mit <code>WHERE</code> auf die Spalte <code>bestand</code> — vergriffen bedeutet, der Wert ist gleich 0.',
     solution:'SELECT titel FROM buecher WHERE bestand = 0;',
     check:(cols,rows)=> rows.length===1 &&
         rows[0].some(v=>String(v).includes('Tod auf dem Nil')),
@@ -383,7 +386,7 @@ const LEVELS = [
     pts:25,
     title:'Wie viele Bücher gibt es?',
     desc:'Wie viele Bücher sind insgesamt erfasst? Gib eine einzige Zahl zurück (das Zählen macht SQL für dich).',
-    hint:'Zählfunktion: <code>SELECT COUNT(*) FROM buecher;</code>',
+    hint:'Es gibt eine Zählfunktion in SQL, die dir die Anzahl der Zeilen einer Abfrage zurückgibt.',
     solution:'SELECT COUNT(*) FROM buecher;',
     check:(cols,rows)=> rows.length===1 && Number(rows[0][0])===12,
   },
@@ -391,7 +394,7 @@ const LEVELS = [
     pts:30,
     title:'Bücher pro Genre',
     desc:'Zeig für jedes <code>genre</code>, wie viele Bücher es gibt: zwei Spalten — das Genre und die Anzahl.',
-    hint:'Mit <code>GROUP BY genre</code> gruppieren, mit <code>COUNT(*)</code> zählen: <code>SELECT genre, COUNT(*) FROM buecher GROUP BY genre;</code>',
+    hint:'Kombiniere <code>GROUP BY</code> mit der Zählfunktion aus der letzten Aufgabe, um pro Gruppe zu zählen.',
     solution:'SELECT genre, COUNT(*) FROM buecher GROUP BY genre;',
     check:(cols,rows)=> rows.length===3 && cols.length===2,
   },
@@ -432,11 +435,11 @@ function renderSchema(){
   document.getElementById('schema').innerHTML = SCHEMA_VIEW.map(t=>`
     <div class="tbl-def">
       <div class="name">▸ ${t.name}</div>
-      <div class="cols">${t.cols.map(c=>{
+      <table><tbody>${t.cols.map(c=>{
         const cls = c[1]==='pk'?'pk':c[1]==='fk'?'fk':'';
-        const tag = c[1]==='pk'?' 🔑':c[1]==='fk'?' →':'';
-        return `<span class="${cls}">${c[0]}${tag}</span>`;
-      }).join('&nbsp;·&nbsp;')}</div>
+        const tag = c[1]==='pk'?'PK 🔑':c[1]==='fk'?'FK →':'';
+        return `<tr><td>${c[0]}</td><td class="col-key ${cls}">${tag}</td></tr>`;
+      }).join('')}</tbody></table>
     </div>`).join('');
 }
 
